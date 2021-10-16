@@ -36,13 +36,15 @@ btnAbrir = Button(marcoInicial, text='Abrir archivo', command=abrirArchivo)
 btnAnalizar = Button(marcoInicial, text='Analizar archivo')
 btnVerReporte = Button(marcoInicial, text='Ver reporte')
 lstSeleccionarReporte = ttk.Combobox(marcoInicial, width=25, state='readonly')      #comboBox
+txtEditor = Text(marcoInicial, bg="grey", foreground="white")          #Área de texto
+
 
 
 #------------------------------------Entorno grafico----------------------------------------------------------
 def ventana_inicial():
-    global ventana, marcoInicial, btnAbrir, btnAnalizar, lstSeleccionarReporte
+    global ventana, marcoInicial, btnAbrir, btnAnalizar, lstSeleccionarReporte, txtEditor
     ventana.title('Consola LFP')
-    ventana.geometry('750x600')
+    ventana.geometry('800x600')
     ventana.resizable(False, False)
     marcoInicial.pack()
     marcoInicial.config(width='750', height='600')
@@ -51,6 +53,8 @@ def ventana_inicial():
     lstSeleccionarReporte.place(x=290, y=20)
     lstSeleccionarReporte['values'] = ['Reporte de Tokens', 'Reporte de Errores', 'árbol de derivación'] #Valores del comboBox
     btnVerReporte.place(x=490, y=20)
+    txtEditor.place(x=30, y=100)
+    txtEditor.config(width=35, height=20)
 
 
 if __name__=='__main__':
