@@ -36,8 +36,8 @@ btnAbrir = Button(marcoInicial, text='Abrir archivo', command=abrirArchivo)
 btnAnalizar = Button(marcoInicial, text='Analizar archivo')
 btnVerReporte = Button(marcoInicial, text='Ver reporte')
 lstSeleccionarReporte = ttk.Combobox(marcoInicial, width=25, state='readonly')      #comboBox
-txtEditor = Text(marcoInicial, bg="grey", foreground="white")          #Área de texto
-
+txtEditor = Text(marcoInicial, bg="#566573", foreground="white")          #Área de texto
+txtConsola = Text(marcoInicial, bg="black", foreground="white", state='disabled')
 
 
 #------------------------------------Entorno grafico----------------------------------------------------------
@@ -55,6 +55,8 @@ def ventana_inicial():
     btnVerReporte.place(x=490, y=20)
     txtEditor.place(x=30, y=100)
     txtEditor.config(width=35, height=20)
+    txtConsola.place(x=400, y=100)
+    txtConsola.config(width=35, height=20)
 
 
 if __name__=='__main__':
