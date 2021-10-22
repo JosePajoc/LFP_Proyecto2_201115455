@@ -25,17 +25,20 @@ def abrirArchivo():
         messagebox.showinfo('Información','Cargado con éxito')
         cargarArch = True
         ventana.title('Consola LFP - ' + rutaArchivo)
-        txtEditor.insert('insert', datosDelArchivo)                         #Mostrar datos del archivo en el editor de texto
+        txtEditor.insert('insert', datosDelArchivo)                        #Mostrar datos del archivo en el editor de texto
     else:
         messagebox.showinfo('Error','El archivo seleccionado no posee extensión \'.pxla\'')
         rutaArchivo = ''
 
 
 def leerCodigo():
-    global txtEditor
+    global txtEditor, txtConsola
     if cargarArch:
-        codigo = txtEditor.get('1.0', 'end-1c')                                 #Extraer contenido del editor de texto
+        codigo = txtEditor.get('1.0', 'end-1c')                             #Extraer contenido del editor de texto
         print(codigo)
+        txtConsola.config(state='normal')
+        txtConsola.insert('insert', '>>>Ejecución iniciada')
+        txtConsola.config(state='disabled')
     else:
         messagebox.showwarning('Error', 'No se ha cargado el archivo...')
 
