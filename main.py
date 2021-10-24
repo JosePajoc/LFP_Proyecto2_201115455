@@ -84,6 +84,9 @@ def analizar(entrada):
             if c == '"':
                 lexemaAct = lexemaAct + c
                 estado = 4
+            elif c == '{':
+                lexemaAct = lexemaAct + c
+                estado = 5
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -93,6 +96,24 @@ def analizar(entrada):
             if esLetra(c):
                 lexemaAct = lexemaAct + c
                 estado = 6
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 5:
+            if esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif c == '"':
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif c == '.':
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
             else:
                 lexemaAct = ''
                 estado = 0
@@ -127,13 +148,62 @@ def analizar(entrada):
                 lexemaAct = ''
                 estado = 0
         elif estado == 8:
+            valido = False
+            extraccion = ''
             print('Se reconocio en S8: ' + lexemaAct + ' fila: ' , fila , ' col: ', columna-(len(lexemaAct)-1))
-            lexema = '\n>>' +  lexemaAct
-            txtConsola.config(state='normal')
-            txtConsola.insert('insert', lexema)
-            txtConsola.config(state='disabled')
+            for palabraR in reservadas:
+                if lexemaAct.startswith(palabraR):
+                    valido = True
+            if valido:
+                #extraer claves y asignar a lista de claves
+                if lexemaAct.startswith('claves'):
+                    extraccion = lexemaAct.replace('claves', '')        #Quitar la plabra claves
+                    extraccion = extraccion.replace('=[', '')           #Quitar =[
+                    extraccion = extraccion.replace(']', '')           #Quitar ]
+                    extraccion = extraccion.replace('"', '')           #Quitar comillas
+                    extraccion = extraccion + ','
+                    temporal = ''
+                    for c in extraccion:
+                        if c != ',':
+                            temporal = temporal + c
+                        else:
+                            claves.append(temporal)
+                            temporal = ''
+                    #print(claves)
+                if lexemaAct.startswith('regitros'):
+                    print(lexemaAct)
             lexemaAct = ''
             estado = 0
+
+        elif estado == 9:
+            if c == '"':
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif c == '.':
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif c == ',':
+                lexemaAct = lexemaAct + c
+                estado = 5
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 9
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+            print(lexemaAct)
+            print(c)
+            
+            '''lexema = '\n>>' +  extraccion
+            txtConsola.config(state='normal')
+            txtConsola.insert('insert', lexema)
+            txtConsola.config(state='disabled')'''
+            
         
 
         # Control de filas y columnas
@@ -202,10 +272,10 @@ txtConsola = Text(marcoInicial, bg="black", foreground="white", state='disabled'
 def ventana_inicial():
     global ventana, marcoInicial, btnAbrir, btnAnalizar, lstSeleccionarReporte, txtEditor
     ventana.title('Consola LFP')
-    ventana.geometry('1250x600')
+    ventana.geometry('1250x550')
     ventana.resizable(False, False)
     marcoInicial.pack()
-    marcoInicial.config(width='1250', height='600')
+    marcoInicial.config(width='1250', height='550')
     btnAbrir.place(x=50, y=20)
     btnAnalizar.place(x=160, y=20)
     lstSeleccionarReporte.place(x=290, y=20)
