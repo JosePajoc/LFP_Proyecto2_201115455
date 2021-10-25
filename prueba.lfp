@@ -19,3 +19,5 @@ de varias lineas
 
 imprimir("Reporte de")
 imprimir("Prueba")
+
+datos();

@@ -42,6 +42,24 @@ def esComa(caracter):
     else:
         False
 
+def datos():
+    global txtConsola
+    campos = '\n>>>'
+    for elemento in claves:
+        campos = campos + elemento + '|  '
+    
+    txtConsola.config(state='normal')
+    txtConsola.insert('insert', campos)
+
+    for fil in range(len(registros)):
+        datosR = '\n>>>   '
+        for col in range(len(claves)):
+            datosR = datosR + registros[fil][col] + '|  '
+        txtConsola.insert('insert', datosR)
+    
+    txtConsola.config(state='disabled')
+
+
 def analizar(entrada):
     global txtConsola, claves, registros
     
@@ -66,6 +84,9 @@ def analizar(entrada):
             elif c == '=':
                 lexemaAct = lexemaAct + c
                 estado = 2
+            elif c == '(':
+                lexemaAct = lexemaAct + c
+                estado = 11
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -243,13 +264,46 @@ def analizar(entrada):
             else:
                 lexemaAct = ''
                 estado = 0
+        elif estado == 11:
+            if c == ')':
+                lexemaAct = lexemaAct + c
+                estado = 17
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 16:
+            print('Se reconocio en S16: ' + lexemaAct + ' fila: ' , fila , ' col: ', columna-(len(lexemaAct)-1))
+            
+            for palabraR in reservadas:
+                if lexemaAct.startswith(palabraR):
+                    valido = True
+            if valido:
+                #extraer claves y asignar a lista de claves
+                if lexemaAct.startswith('datos'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    #Llamando función de mostrar datos
+                    datos()
+            
+            lexemaAct = ''
+            estado = 0
+        
+        elif estado == 17:
+            if c == ';':
+                lexemaAct = lexemaAct + c
+                estado = 16
+                print(estado)
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
             
     
-            '''lexema = '\n>>' +  extraccion
-            txtConsola.config(state='normal')
-            txtConsola.insert('insert', lexema)
-            txtConsola.config(state='disabled')'''
-
         # Control de filas y columnas
         if (ord(c) == 10):              #Salto de Línea
             columna = 0
@@ -264,8 +318,8 @@ def analizar(entrada):
         
         columna = columna + 1
 
-    print(claves)
-    print(registros)  
+    #print(claves)
+    #print(registros)  
 
 
 def abrirArchivo():
@@ -294,6 +348,7 @@ def leerCodigo():
     global txtEditor
     if cargarArch:
         codigo = txtEditor.get('1.0', 'end-1c')                             #Extraer contenido del editor de texto
+        codigo = codigo + '~'
         txtConsola.config(state='normal')
         txtConsola.insert('insert', '>>Ejecución iniciada')
         txtConsola.config(state='disabled')
