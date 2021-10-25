@@ -159,19 +159,43 @@ def analizar(entrada):
                 if lexemaAct.startswith('claves'):
                     extraccion = lexemaAct.replace('claves', '')        #Quitar la plabra claves
                     extraccion = extraccion.replace('=[', '')           #Quitar =[
-                    extraccion = extraccion.replace(']', '')           #Quitar ]
-                    extraccion = extraccion.replace('"', '')           #Quitar comillas
+                    extraccion = extraccion.replace(']', '')            #Quitar ]
+                    extraccion = extraccion.replace('"', '')            #Quitar comillas
                     extraccion = extraccion + ','
                     temporal = ''
                     for c in extraccion:
-                        if c != ',':
+                        if c != ',':                                    #Separación por comas
                             temporal = temporal + c
                         else:
                             claves.append(temporal)
                             temporal = ''
                     #print(claves)
-                if lexemaAct.startswith('regitros'):
-                    print(lexemaAct)
+                #extraer registros y asignar a lista de registros
+                if lexemaAct.startswith('registros'):
+                    extraccion = lexemaAct.replace('registros', '')     #Quitar la plabra registros
+                    extraccion = extraccion.replace('=[', '')           #Quitar =[
+                    extraccion = extraccion.replace(']', '')            #Quitar ]
+                    temp = []
+                    temporal = ''
+                    for c in extraccion:
+                        if c != '}':                                    #Separación por }
+                            temporal = temporal + c
+                        else:
+                            temp.append(temporal)
+                            temporal = ''
+                    temporal = ''
+                    for i in range(len(temp)):                          
+                        temp[i] = temp[i].replace('{', '')              #Quitar { de cada registro
+                        temp[i] = temp[i] + ','
+                        for c in temp[i]:
+                            if c != ',':                                    #Separación por comas
+                                temporal = temporal + c
+                            else:
+                                print(temporal)
+                                temporal = ''
+                    
+                    #print('Elementos en registro: ' , len(temp))
+                    #print(temp)
             lexemaAct = ''
             estado = 0
 
@@ -184,20 +208,34 @@ def analizar(entrada):
                 estado = 9
             elif c == ',':
                 lexemaAct = lexemaAct + c
-                estado = 5
-            elif esNumero(c):
-                lexemaAct = lexemaAct + c
-                estado = 9
+                estado = 5  
             elif esLetra(c):
                 lexemaAct = lexemaAct + c
                 estado = 9
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 9 
+            elif c =='}':
+                lexemaAct = lexemaAct + c
+                estado = 10
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
                 lexemaAct = ''
                 estado = 0
-            print(lexemaAct)
-            print(c)
+        elif estado == 10:
+            if c == '{':
+                lexemaAct = lexemaAct + c
+                estado = 5
+            elif c == ']':
+                lexemaAct = lexemaAct + c
+                estado = 8
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+            
             
             '''lexema = '\n>>' +  extraccion
             txtConsola.config(state='normal')
