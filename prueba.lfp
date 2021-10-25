@@ -17,7 +17,11 @@ Esto es un comentario
 de varias lineas
 '''
 
-imprimir("Reporte de")
-imprimir("Prueba")
+imprimir("Reporte de");
+imprimir(" Prueba");
+
+imprimirln("Mensaje de prueba");
 
 datos();
+
+conteo();

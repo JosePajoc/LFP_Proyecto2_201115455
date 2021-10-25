@@ -11,7 +11,8 @@ reservadas = ['claves', 'registros', 'imprimir', 'imprimirln', 'conteo', 'promed
 'max', 'min', 'exportarreporte']
 claves = []
 registros = None
-
+clavesCargadas = False
+registrosCargados = False
 
 #-----------------------------------------Funciones-----------------------------------------------------------
 def esLetra(caracter):
@@ -54,14 +55,17 @@ def datos():
     for fil in range(len(registros)):
         datosR = '\n>>>   '
         for col in range(len(claves)):
-            datosR = datosR + registros[fil][col] + '|  '
+            datosR = datosR + registros[fil][col] + '|    '
         txtConsola.insert('insert', datosR)
     
     txtConsola.config(state='disabled')
 
 
 def analizar(entrada):
-    global txtConsola, claves, registros
+    global txtConsola, claves, registros, clavesCargadas, registrosCargados
+    #Reinicio para utilizar de nuevo al dar clic al botón analizar
+    claves = []
+    registros = None
     
     fila = 1
     columna = 0
@@ -190,9 +194,9 @@ def analizar(entrada):
                         if c != ',':                                    #Separación por comas
                             temporal = temporal + c
                         else:
-                            claves.append(temporal)
+                            claves.append(temporal)                     #Agregando a la lista de claves
                             temporal = ''
-                    
+                    clavesCargadas = True
                 #extraer registros y asignar a lista de registros
                 if lexemaAct.startswith('registros'):
                     extraccion = lexemaAct.replace('registros', '')     #Quitar la plabra registros
@@ -220,11 +224,12 @@ def analizar(entrada):
                             if c != ',':                                    #Separación por comas
                                 temporal = temporal + c
                             else:
-                                registros[i][col] = temporal
+                                registros[i][col] = temporal            #Agregando registros a la matriz
                                 col = col + 1
                                 temporal = ''
                         col = 0
-                    
+                    registrosCargados = True
+
             lexemaAct = ''
             estado = 0
 
@@ -268,6 +273,66 @@ def analizar(entrada):
             if c == ')':
                 lexemaAct = lexemaAct + c
                 estado = 17
+            elif c == '"':
+                lexemaAct = lexemaAct + c
+                estado = 12
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 12:
+            if esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif ord(c) == 32:
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 13:
+            if c == '"':
+                lexemaAct = lexemaAct + c
+                estado = 14
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif ord(c) == 32:
+                lexemaAct = lexemaAct + c
+                estado = 13
+            elif ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 14:
+            if c == ')':
+                lexemaAct = lexemaAct + c
+                estado = 15
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 15:
+            if c == ';':
+                lexemaAct = lexemaAct + c
+                estado = 16
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -286,9 +351,44 @@ def analizar(entrada):
                     txtConsola.config(state='normal')
                     txtConsola.insert('insert', lexema)
                     txtConsola.config(state='disabled')
-                    #Llamando función de mostrar datos
-                    datos()
-            
+                    if clavesCargadas == True and registrosCargados == True:
+                        #Llamando función de mostrar datos
+                        datos()
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
+
+                elif lexemaAct.startswith('conteo'):
+                    lexema = '\n>>>' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    if clavesCargadas == True and registrosCargados == True:
+                        totalR = '\n' + str(len(registros))
+                        txtConsola.insert('insert', totalR)
+                    else:
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                    txtConsola.config(state='disabled')
+
+                elif lexemaAct.startswith('imprimir'):
+                    lexema = lexemaAct.replace('imprimir', '')
+                    if lexema.startswith('ln'):
+                        lexema = '\n>>>' + lexema
+                        lexema = lexema.replace('ln', '')
+                        lexema = lexema.replace('(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', lexema)
+                        txtConsola.config(state='disabled')
+                    else:
+                        lexema = lexema.replace('(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', lexema)
+                        txtConsola.config(state='disabled')
+                
             lexemaAct = ''
             estado = 0
         
@@ -350,7 +450,7 @@ def leerCodigo():
         codigo = txtEditor.get('1.0', 'end-1c')                             #Extraer contenido del editor de texto
         codigo = codigo + '~'
         txtConsola.config(state='normal')
-        txtConsola.insert('insert', '>>Ejecución iniciada')
+        txtConsola.insert('insert', '>>>Ejecución iniciada\n')
         txtConsola.config(state='disabled')
         analizar(codigo)
         
