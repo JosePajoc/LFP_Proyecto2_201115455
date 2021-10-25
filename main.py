@@ -10,7 +10,7 @@ cargarArch = False
 reservadas = ['claves', 'registros', 'imprimir', 'imprimirln', 'conteo', 'promedio', 'contarsi', 'datos', 'sumar',
 'max', 'min', 'exportarreporte']
 claves = []
-registros = []
+registros = None
 
 
 #-----------------------------------------Funciones-----------------------------------------------------------
@@ -43,7 +43,7 @@ def esComa(caracter):
         False
 
 def analizar(entrada):
-    global txtConsola
+    global txtConsola, claves, registros
     
     fila = 1
     columna = 0
@@ -150,7 +150,9 @@ def analizar(entrada):
         elif estado == 8:
             valido = False
             extraccion = ''
+
             print('Se reconocio en S8: ' + lexemaAct + ' fila: ' , fila , ' col: ', columna-(len(lexemaAct)-1))
+            
             for palabraR in reservadas:
                 if lexemaAct.startswith(palabraR):
                     valido = True
@@ -169,7 +171,7 @@ def analizar(entrada):
                         else:
                             claves.append(temporal)
                             temporal = ''
-                    #print(claves)
+                    
                 #extraer registros y asignar a lista de registros
                 if lexemaAct.startswith('registros'):
                     extraccion = lexemaAct.replace('registros', '')     #Quitar la plabra registros
@@ -181,21 +183,27 @@ def analizar(entrada):
                         if c != '}':                                    #Separación por }
                             temporal = temporal + c
                         else:
-                            temp.append(temporal)
+                            temp.append(temporal)                       #Agregar a lista temporal para separar registros
                             temporal = ''
                     temporal = ''
+
+                    #creando matriz con dimensiones definidas y llenando con letra a
+                    registros = [['a' for co in range(len(claves))] for fi in range(len(temp))]
+                    col = 0
+
                     for i in range(len(temp)):                          
                         temp[i] = temp[i].replace('{', '')              #Quitar { de cada registro
-                        temp[i] = temp[i] + ','
+                        temp[i] = temp[i] + ','                         #Se agrega , al final de cada cadena
+                        #Recorrer cada elemento y luego recorrer caracter por caracter para separar por comas
                         for c in temp[i]:
                             if c != ',':                                    #Separación por comas
                                 temporal = temporal + c
                             else:
-                                print(temporal)
+                                registros[i][col] = temporal
+                                col = col + 1
                                 temporal = ''
+                        col = 0
                     
-                    #print('Elementos en registro: ' , len(temp))
-                    #print(temp)
             lexemaAct = ''
             estado = 0
 
@@ -236,13 +244,11 @@ def analizar(entrada):
                 lexemaAct = ''
                 estado = 0
             
-            
+    
             '''lexema = '\n>>' +  extraccion
             txtConsola.config(state='normal')
             txtConsola.insert('insert', lexema)
             txtConsola.config(state='disabled')'''
-            
-        
 
         # Control de filas y columnas
         if (ord(c) == 10):              #Salto de Línea
@@ -257,7 +263,9 @@ def analizar(entrada):
             continue
         
         columna = columna + 1
-        
+
+    print(claves)
+    print(registros)  
 
 
 def abrirArchivo():
