@@ -20,8 +20,12 @@ de varias lineas
 imprimir("Reporte de");
 imprimir(" Prueba");
 
+promedio("precio_compra");
+
 imprimirln("Mensaje de prueba");
 
 datos();
 
 conteo();
+promedio("producto");
+sumar("precio_venta");

@@ -60,13 +60,42 @@ def datos():
     
     txtConsola.config(state='disabled')
 
+def promedio_suma(campo, tipo):
+    global claves, registros
+    existe = False
+    posicion = 0
+    for i in range(len(claves)):
+        if campo == claves[i]:
+            existe = True
+            posicion = i
+    txtConsola.config(state='normal')
+    if existe:
+        suma = 0
+        try:
+            for i in range(len(registros)):
+                suma = suma + float(registros[i][posicion])
+            total_promedio = suma / len(registros)
+            if tipo == 'PRO':
+                txtConsola.insert('insert', '\n>>>' + str(total_promedio))
+            elif tipo == 'SUM':
+                txtConsola.insert('insert', '\n>>>' + str(suma))
+        except:
+            txtConsola.insert('insert', '\n>>>El campo ' + campo + ' no posee valores numericos')    
+    else:
+        txtConsola.insert('insert', '\n>>>El campo ' + campo + ' no existe')
+    txtConsola.config(state='disabled')
+    
 
 def analizar(entrada):
     global txtConsola, claves, registros, clavesCargadas, registrosCargados
     #Reinicio para utilizar de nuevo al dar clic al botón analizar
     claves = []
     registros = None
-    
+    txtConsola.config(state='normal')
+    txtConsola.delete("1.0", "end")
+    txtConsola.insert('insert', '>>>Ejecución iniciada\n')
+    txtConsola.config(state='disabled')
+
     fila = 1
     columna = 0
     estado = 0
@@ -370,6 +399,38 @@ def analizar(entrada):
                         txtConsola.insert('insert', 'No se han cargado todos los datos')
                     txtConsola.config(state='disabled')
 
+                elif lexemaAct.startswith('promedio'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    if clavesCargadas == True and registrosCargados == True:
+                        lexema = lexemaAct.replace('promedio(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        #Llamando función de promedio
+                        promedio_suma(lexema, 'PRO')
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
+                
+                elif lexemaAct.startswith('sumar'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    if clavesCargadas == True and registrosCargados == True:
+                        lexema = lexemaAct.replace('sumar(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        #Llamando función de promedio
+                        promedio_suma(lexema, 'SUM')
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
+
                 elif lexemaAct.startswith('imprimir'):
                     lexema = lexemaAct.replace('imprimir', '')
                     if lexema.startswith('ln'):
@@ -449,9 +510,6 @@ def leerCodigo():
     if cargarArch:
         codigo = txtEditor.get('1.0', 'end-1c')                             #Extraer contenido del editor de texto
         codigo = codigo + '~'
-        txtConsola.config(state='normal')
-        txtConsola.insert('insert', '>>>Ejecución iniciada\n')
-        txtConsola.config(state='disabled')
         analizar(codigo)
         
     else:
