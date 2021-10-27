@@ -3,6 +3,7 @@ from tkinter import messagebox                      #Módulo para cuadros de men
 from tkinter import *                               #Módulo para entorno gráfico
 from tkinter import ttk                             #Módulo para usar comboBoxs
 import re                                           #Módulo de expresiones regulares
+from reportes import reporte
 
 #------------------------------------------Global-------------------------------------------------------------
 archivoCargado = None
@@ -149,6 +150,12 @@ def contar_si(campo, valor):
     else:
         txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no existe')
     txtConsola.config(state='disabled')
+
+def exportar_reporte(titulo):
+    global claves, registros
+    nuevoReporte = reporte(claves, registros)
+    nuevoReporte.crearReporte(titulo)
+
 
 def analizar(entrada):
     global txtConsola, claves, registros, clavesCargadas, registrosCargados
@@ -552,6 +559,22 @@ def analizar(entrada):
                         campo = campo.replace(',', '')
                         #Llamando función CONTARSI
                         contar_si(campo, valor)
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
+                
+                elif lexemaAct.startswith('exportarreporte'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    if clavesCargadas == True and registrosCargados == True:
+                        lexema = lexemaAct.replace('exportarreporte(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        #Llamando función Exportar Reporte
+                        exportar_reporte(lexema)
                     else:
                         txtConsola.config(state='normal')
                         txtConsola.insert('insert', 'No se han cargado todos los datos')
