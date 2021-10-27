@@ -29,3 +29,6 @@ datos();
 conteo();
 promedio("producto");
 sumar("precio_venta");
+
+max("precio_venta");
+min("precio_compra");

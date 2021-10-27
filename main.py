@@ -47,7 +47,7 @@ def datos():
     global txtConsola
     campos = '\n>>>'
     for elemento in claves:
-        campos = campos + elemento + '|  '
+        campos = campos + elemento + '|  |'
     
     txtConsola.config(state='normal')
     txtConsola.insert('insert', campos)
@@ -55,7 +55,7 @@ def datos():
     for fil in range(len(registros)):
         datosR = '\n>>>   '
         for col in range(len(claves)):
-            datosR = datosR + registros[fil][col] + '|    '
+            datosR = datosR + registros[fil][col] + '|  |'
         txtConsola.insert('insert', datosR)
     
     txtConsola.config(state='disabled')
@@ -76,15 +76,61 @@ def promedio_suma(campo, tipo):
                 suma = suma + float(registros[i][posicion])
             total_promedio = suma / len(registros)
             if tipo == 'PRO':
-                txtConsola.insert('insert', '\n>>>' + str(total_promedio))
+                txtConsola.insert('insert', '\n>>> ' + str(total_promedio))
             elif tipo == 'SUM':
-                txtConsola.insert('insert', '\n>>>' + str(suma))
+                txtConsola.insert('insert', '\n>>> ' + str(suma))
         except:
-            txtConsola.insert('insert', '\n>>>El campo ' + campo + ' no posee valores numericos')    
+            txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no posee valores numericos')    
     else:
-        txtConsola.insert('insert', '\n>>>El campo ' + campo + ' no existe')
+        txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no existe')
     txtConsola.config(state='disabled')
-    
+
+def funcion_max(campo):
+    global claves, registros
+    existe = False
+    posicion = 0
+    for i in range(len(claves)):
+        if campo == claves[i]:
+            existe = True
+            posicion = i
+    txtConsola.config(state='normal')
+    if existe:
+        try:
+            maximo = 0
+            for i in range(len(registros)):
+                if float(registros[i][posicion]) > maximo:
+                    maximo = float(registros[i][posicion])
+
+            txtConsola.insert('insert', '\n>>> ' + str(maximo))
+        except:
+            txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no posee valores numericos')    
+    else:
+        txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no existe')
+    txtConsola.config(state='disabled')
+
+def funcion_min(campo):
+    global claves, registros
+    existe = False
+    posicion = 0
+    for i in range(len(claves)):
+        if campo == claves[i]:
+            existe = True
+            posicion = i
+    txtConsola.config(state='normal')
+    if existe:
+        try:
+            minimo = float(registros[0][posicion])
+            for i in range(len(registros)):
+                if float(registros[i][posicion]) < minimo:
+                    minimo = float(registros[i][posicion])
+
+            txtConsola.insert('insert', '\n>>> ' + str(minimo))
+        except:
+            txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no posee valores numericos')    
+    else:
+        txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no existe')
+    txtConsola.config(state='disabled')
+
 
 def analizar(entrada):
     global txtConsola, claves, registros, clavesCargadas, registrosCargados
@@ -424,8 +470,40 @@ def analizar(entrada):
                         lexema = lexemaAct.replace('sumar(', '')
                         lexema = lexema.replace(');', '')
                         lexema = lexema.replace('"', '')
-                        #Llamando función de promedio
+                        #Llamando función de promedio_suma
                         promedio_suma(lexema, 'SUM')
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
+                
+                elif lexemaAct.startswith('max'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    if clavesCargadas == True and registrosCargados == True:
+                        lexema = lexemaAct.replace('max(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        #Llamando función MAX
+                        funcion_max(lexema)
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
+                
+                elif lexemaAct.startswith('min'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    if clavesCargadas == True and registrosCargados == True:
+                        lexema = lexemaAct.replace('min(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        #Llamando función MIN
+                        funcion_min(lexema)
                     else:
                         txtConsola.config(state='normal')
                         txtConsola.insert('insert', 'No se han cargado todos los datos')
@@ -457,7 +535,6 @@ def analizar(entrada):
             if c == ';':
                 lexemaAct = lexemaAct + c
                 estado = 16
-                print(estado)
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
