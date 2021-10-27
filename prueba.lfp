@@ -32,3 +32,5 @@ sumar("precio_venta");
 
 max("precio_venta");
 min("precio_compra");
+
+contarsi("stock", 0);

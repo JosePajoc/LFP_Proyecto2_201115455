@@ -47,7 +47,7 @@ def datos():
     global txtConsola
     campos = '\n>>>'
     for elemento in claves:
-        campos = campos + elemento + '|  |'
+        campos = campos + elemento + '||'
     
     txtConsola.config(state='normal')
     txtConsola.insert('insert', campos)
@@ -55,7 +55,7 @@ def datos():
     for fil in range(len(registros)):
         datosR = '\n>>>   '
         for col in range(len(claves)):
-            datosR = datosR + registros[fil][col] + '|  |'
+            datosR = datosR + registros[fil][col] + '|   |'
         txtConsola.insert('insert', datosR)
     
     txtConsola.config(state='disabled')
@@ -131,6 +131,24 @@ def funcion_min(campo):
         txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no existe')
     txtConsola.config(state='disabled')
 
+def contar_si(campo, valor):
+    global claves, registros
+    existe = False
+    posicion = 0
+    for i in range(len(claves)):
+        if campo == claves[i]:
+            existe = True
+            posicion = i
+    txtConsola.config(state='normal')
+    if existe:
+        cantidad = 0
+        for i in range(len(registros)):
+            if valor == registros[i][posicion]:
+                cantidad = cantidad + 1
+        txtConsola.insert('insert', '\n>>> ' + str(cantidad))
+    else:
+        txtConsola.insert('insert', '\n>>> El campo ' + campo + ' no existe')
+    txtConsola.config(state='disabled')
 
 def analizar(entrada):
     global txtConsola, claves, registros, clavesCargadas, registrosCargados
@@ -209,9 +227,6 @@ def analizar(entrada):
             elif c == '"':
                 lexemaAct = lexemaAct + c
                 estado = 9
-            elif c == '.':
-                lexemaAct = lexemaAct + c
-                estado = 9
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -277,6 +292,7 @@ def analizar(entrada):
                     extraccion = lexemaAct.replace('registros', '')     #Quitar la plabra registros
                     extraccion = extraccion.replace('=[', '')           #Quitar =[
                     extraccion = extraccion.replace(']', '')            #Quitar ]
+                    extraccion = extraccion.replace('"', '')            #Quitar comillas
                     temp = []
                     temporal = ''
                     for c in extraccion:
@@ -399,6 +415,9 @@ def analizar(entrada):
             if c == ')':
                 lexemaAct = lexemaAct + c
                 estado = 15
+            elif c == ',':
+                lexemaAct = lexemaAct + c
+                estado = 18
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -508,6 +527,35 @@ def analizar(entrada):
                         txtConsola.config(state='normal')
                         txtConsola.insert('insert', 'No se han cargado todos los datos')
                         txtConsola.config(state='disabled')
+                
+                elif lexemaAct.startswith('contarsi'):
+                    lexema = '\n' + lexemaAct
+                    txtConsola.config(state='normal')
+                    txtConsola.insert('insert', lexema)
+                    txtConsola.config(state='disabled')
+                    if clavesCargadas == True and registrosCargados == True:
+                        lexema = lexemaAct.replace('contarsi(', '')
+                        lexema = lexema.replace(');', '')
+                        lexema = lexema.replace('"', '')
+                        campo = ''
+                        valor = ''
+                        posicion = 0
+                        for l in lexema:
+                            if l != ',':
+                                campo = campo + l
+                                posicion = posicion + 1
+                            else:
+                                campo = campo + l
+                                posicion = posicion + 1
+                                break
+                        valor = lexema.replace(campo, '')
+                        campo = campo.replace(',', '')
+                        #Llamando función CONTARSI
+                        contar_si(campo, valor)
+                    else:
+                        txtConsola.config(state='normal')
+                        txtConsola.insert('insert', 'No se han cargado todos los datos')
+                        txtConsola.config(state='disabled')
 
                 elif lexemaAct.startswith('imprimir'):
                     lexema = lexemaAct.replace('imprimir', '')
@@ -530,7 +578,6 @@ def analizar(entrada):
                 
             lexemaAct = ''
             estado = 0
-        
         elif estado == 17:
             if c == ';':
                 lexemaAct = lexemaAct + c
@@ -540,7 +587,42 @@ def analizar(entrada):
             else:
                 lexemaAct = ''
                 estado = 0
-            
+        elif estado == 18:
+            if esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 19:
+            if esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif c == '.':
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif c == ')':
+                lexemaAct = lexemaAct + c
+                estado = 15
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                pass 
+            else:
+                lexemaAct = ''
+                estado = 0
     
         # Control de filas y columnas
         if (ord(c) == 10):              #Salto de Línea
@@ -555,10 +637,6 @@ def analizar(entrada):
             continue
         
         columna = columna + 1
-
-    #print(claves)
-    #print(registros)  
-
 
 def abrirArchivo():
     global archivoCargado, cargarArch, ventana, txtEditor
@@ -581,7 +659,6 @@ def abrirArchivo():
         messagebox.showinfo('Error','El archivo seleccionado no posee extensión \'.pxla\'')
         rutaArchivo = ''
 
-
 def leerCodigo():
     global txtEditor
     if cargarArch:
@@ -592,7 +669,6 @@ def leerCodigo():
     else:
         messagebox.showwarning('Error', 'No se ha cargado el archivo...')
 
-
 #----------------------------------Objetos de entorno gráfico Global---------------------------------------------
 ventana = Tk()
 marcoInicial = Frame()
@@ -602,7 +678,6 @@ btnVerReporte = Button(marcoInicial, text='Ver reporte')
 lstSeleccionarReporte = ttk.Combobox(marcoInicial, width=25, state='readonly')      #comboBox
 txtEditor = Text(marcoInicial, bg="#566573", foreground="white", width=70, height=25)          #Área de texto
 txtConsola = Text(marcoInicial, bg="black", foreground="white", state='disabled', width=70, height=25)
-
 
 #------------------------------------Entorno grafico----------------------------------------------------------
 def ventana_inicial():
@@ -620,9 +695,7 @@ def ventana_inicial():
     txtEditor.place(x=30, y=100)
     txtConsola.place(x=635, y=100)  
 
-
 if __name__=='__main__':
     ventana_inicial()
-
 
 ventana.mainloop()
