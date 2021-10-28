@@ -179,6 +179,12 @@ def analizar(entrada):
             if esLetra(c):
                 lexemaAct = lexemaAct + c
                 estado = 1
+            elif c == '#':
+                lexemaAct = lexemaAct + c
+                estado = 20
+            elif c == "'":
+                lexemaAct = lexemaAct + c
+                estado = 22
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -650,6 +656,99 @@ def analizar(entrada):
             else:
                 lexemaAct = ''
                 estado = 0
+        elif estado == 20:
+            if esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 20
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 20
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 20
+            elif ord(c) == 32 or ord(c) == 9:                       #espacio en blanco, tabulación horizontal
+                lexemaAct = lexemaAct + c
+                estado = 20
+            elif ord(c) == 10:
+                lexemaAct = lexemaAct + c
+                estado = 21
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 21:
+            #Aceptación de comentario de una línea
+            print('Se reconocio en S21: ' + lexemaAct + ' fila: ' , fila , ' col: ', columna-(len(lexemaAct)-1))
+            lexemaAct = ''
+            estado = 0
+        elif estado == 22:
+            if c == "'":
+                lexemaAct = lexemaAct + c
+                estado = 23
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 23:
+            if c == "'":
+                lexemaAct = lexemaAct + c
+                estado = 24
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 24:
+            if esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 25
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 25
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 25
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                lexemaAct = lexemaAct + c
+                estado = 25                
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 25:
+            if c == "'":
+                lexemaAct = lexemaAct + c
+                estado = 26
+            elif esLetra(c):
+                lexemaAct = lexemaAct + c
+                estado = 25
+            elif esNumero(c):
+                lexemaAct = lexemaAct + c
+                estado = 25
+            elif imprimible(c):
+                lexemaAct = lexemaAct + c
+                estado = 25
+            elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
+                lexemaAct = lexemaAct + c
+                estado = 25
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 26:
+            if c == "'":
+                lexemaAct = lexemaAct + c
+                estado = 27
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 27:
+            if c == "'":
+                lexemaAct = lexemaAct + c
+                estado = 28
+            else:
+                lexemaAct = ''
+                estado = 0
+        elif estado == 28:
+            #Aceptación de comentario de varias líneas
+            print('Se reconocio en S28: ' + lexemaAct + ' fila: ' , fila , ' col: ', columna-(len(lexemaAct)-1))
+            lexemaAct = ''
+            estado = 0
+
     
         # Control de filas y columnas
         if (ord(c) == 10):              #Salto de Línea
