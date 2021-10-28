@@ -18,7 +18,7 @@ registrosCargados = False
 #-----------------------------------------Funciones-----------------------------------------------------------
 def esLetra(caracter):
     valor = ord(caracter)                   #Convertir ASCII a entero
-    if ((valor>= 65) and (valor<=90)) or ((valor>= 97) and (valor<=122)) or valor==165 or valor==164:
+    if ((valor>= 65) and (valor<=90)) or ((valor>= 97) and (valor<=122)) or ((valor>= 160) and (valor<=163)) or caracter=='ñ' or caracter=='Ñ' or caracter=='á' or caracter=='é' or caracter=='í' or caracter=='ó' or caracter=='ú' or caracter=='ä' or caracter=='ë' or caracter=='ï' or caracter=='ö' or caracter=='ü':
         return True
     else:
         return False
@@ -32,7 +32,7 @@ def esNumero(caracter):
 
 def imprimible(caracter):                   #Convertir ASCII imprimible a entero
     valor = ord(caracter)
-    if (valor>=33 and valor<=39) or (valor>=128 and valor<=239) or (valor == 95):
+    if (valor>=33 and valor<=47) or (valor>=128 and valor<=239) or (valor == 95) or (valor == 58) or (valor == 60) or (valor == 62) or (valor == 63):
         return True
     else:
         return False
@@ -152,10 +152,11 @@ def contar_si(campo, valor):
     txtConsola.config(state='disabled')
 
 def exportar_reporte(titulo):
-    global claves, registros
-    nuevoReporte = reporte(claves, registros)
-    nuevoReporte.crearReporte(titulo)
-
+    global claves, registros, clavesCargadas, registrosCargados
+    if clavesCargadas == True and registrosCargados == True:
+        nuevoReporte = reporte(claves, registros)
+        nuevoReporte.crearReporte(titulo)
+        messagebox.showinfo('Información','El reporte fue creado en la carpeta llamada "reporte html"')
 
 def analizar(entrada):
     global txtConsola, claves, registros, clavesCargadas, registrosCargados
@@ -167,11 +168,13 @@ def analizar(entrada):
     txtConsola.insert('insert', '>>>Ejecución iniciada\n')
     txtConsola.config(state='disabled')
 
+    entrada2 = entrada.lower()                  #Cambio a minúsculas
+
     fila = 1
     columna = 0
     estado = 0
     lexemaAct = ''
-    for c in entrada:
+    for c in entrada2:
         if estado == 0:
             if esLetra(c):
                 lexemaAct = lexemaAct + c
@@ -537,6 +540,7 @@ def analizar(entrada):
                 
                 elif lexemaAct.startswith('contarsi'):
                     lexema = '\n' + lexemaAct
+                    print(lexemaAct)
                     txtConsola.config(state='normal')
                     txtConsola.insert('insert', lexema)
                     txtConsola.config(state='disabled')
@@ -626,7 +630,13 @@ def analizar(entrada):
                 lexemaAct = ''
                 estado = 0
         elif estado == 19:
-            if esNumero(c):
+            if c == ')':
+                lexemaAct = lexemaAct + c
+                estado = 15
+            elif c == '.':
+                lexemaAct = lexemaAct + c
+                estado = 19
+            elif esNumero(c):
                 lexemaAct = lexemaAct + c
                 estado = 19
             elif esLetra(c):
@@ -635,12 +645,6 @@ def analizar(entrada):
             elif imprimible(c):
                 lexemaAct = lexemaAct + c
                 estado = 19
-            elif c == '.':
-                lexemaAct = lexemaAct + c
-                estado = 19
-            elif c == ')':
-                lexemaAct = lexemaAct + c
-                estado = 15
             elif ord(c) == 32 or ord(c) == 10 or ord(c) == 9:       #Ignorar espacio en blanco, nueva línea, tabulación horizontal
                 pass 
             else:
@@ -671,13 +675,13 @@ def abrirArchivo():
     elif len(extension)>0 and extension[0] == '.lfp':
         archivoCargado = open(rutaArchivo, 'r')
         archivoLFP = archivoCargado.read()
-        archivoCargado.close()
-        datosDelArchivo = archivoLFP.lower()                               #Cambio a minúsculas
-        
+        archivoCargado.close()                            
         messagebox.showinfo('Información','Cargado con éxito')
         cargarArch = True
         ventana.title('Consola LFP - ' + rutaArchivo)
-        txtEditor.insert('insert', datosDelArchivo)                        #Mostrar datos del archivo en el editor de texto
+        
+        txtEditor.delete("1.0", "end")
+        txtEditor.insert('insert', archivoLFP)                        #Mostrar datos del archivo en el editor de texto
     else:
         messagebox.showinfo('Error','El archivo seleccionado no posee extensión \'.pxla\'')
         rutaArchivo = ''
