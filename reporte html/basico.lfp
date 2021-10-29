@@ -1,8 +1,0 @@
-
-imprimir("Plantilla actual de: ");
-imprimirln("FC Bayern Munchen");
-
-imprimir("Muchos de ellos estaban cuando el equipo destruyó 2 - 8 al todo poderoso Barcelona de Messi, ");
-imprimir("pero también faltan Perisic, Coutinho y Alaba que contribuyeron con goles al humillante marcador en ese partido (aunque Alaba marco autogol).");
-
-imprimir("17, "Michaël", "Cuisance", "Francés", 22");

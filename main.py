@@ -749,7 +749,6 @@ def analizar(entrada):
             lexemaAct = ''
             estado = 0
 
-    
         # Control de filas y columnas
         if (ord(c) == 10):              #Salto de Línea
             columna = 0
